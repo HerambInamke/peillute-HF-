@@ -3,6 +3,7 @@
 //! This module provides a component for displaying system-wide information,
 //! including network details, logical clock states, and peer connections.
 
+use crate::hooks::use_auto_refresh;
 use dioxus::prelude::*;
 
 /// Server function to retrieve the local network address
@@ -151,6 +152,7 @@ pub fn Info() -> Element {
     let mut db_path = use_signal(|| "".to_string());
     let mut snapshot_content = use_signal(|| None::<String>);
 
+    // Initial load
     use_future(move || async move {
         // Fetch local address
         if let Ok(data) = get_local_addr().await {
@@ -206,6 +208,59 @@ pub fn Info() -> Element {
         if let Ok(data) = get_snapshot_content().await {
             snapshot_content.set(data);
         } // else: snapshot_content remains None or handle error
+    });
+
+    // Auto-refresh every 3 seconds
+    use_auto_refresh(3000, {
+        let local_addr = local_addr;
+        let site_id = site_id;
+        let peers_addr = peers_addr;
+        let connected_neighbours = connected_neighbours;
+        let lamport = lamport;
+        let vector_clock = vector_clock;
+        let nb_neighbours = nb_neighbours;
+        let nb_peers = nb_peers;
+        let db_path = db_path;
+        move || {
+            let local_addr = local_addr;
+            let site_id = site_id;
+            let peers_addr = peers_addr;
+            let connected_neighbours = connected_neighbours;
+            let lamport = lamport;
+            let vector_clock = vector_clock;
+            let nb_neighbours = nb_neighbours;
+            let nb_peers = nb_peers;
+            let db_path = db_path;
+            async move {
+                if let Ok(data) = get_local_addr().await {
+                    local_addr.set(data);
+                }
+                if let Ok(data) = get_site_id().await {
+                    site_id.set(data);
+                }
+                if let Ok(data) = get_peers().await {
+                    peers_addr.set(data);
+                }
+                if let Ok(data) = get_connected_neighbours().await {
+                    connected_neighbours.set(data);
+                }
+                if let Ok(data) = get_lamport().await {
+                    lamport.set(data);
+                }
+                if let Ok(data) = get_vector_clock().await {
+                    vector_clock.set(data);
+                }
+                if let Ok(data) = get_nb_connected_neighbours().await {
+                    nb_neighbours.set(data);
+                }
+                if let Ok(data) = get_nb_cli_peers().await {
+                    nb_peers.set(data);
+                }
+                if let Ok(data) = get_db_path().await {
+                    db_path.set(data);
+                }
+            }
+        }
     });
 
     rsx! {

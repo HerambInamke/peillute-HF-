@@ -4,6 +4,7 @@
 //! including viewing transaction history, making deposits, withdrawals, payments,
 //! refunds, and transfers between users.
 
+use crate::hooks::use_auto_refresh;
 use dioxus::prelude::*;
 
 // show all transactions as vertical card list
@@ -11,14 +12,28 @@ use dioxus::prelude::*;
 ///
 /// Displays a list of all transactions for a specific user, showing details such as
 /// the source and destination users, amount, and any associated messages.
+/// Automatically refreshes transaction history every 3 seconds.
 #[component]
 pub fn History(name: String) -> Element {
     let name = std::rc::Rc::new(name);
     let name_for_future = name.clone();
+    let refresh_trigger = use_signal(|| 0);
 
     let transactions_resource = use_resource(move || {
+        let trigger = *refresh_trigger.read();
         let name_clone = name_for_future.clone();
         async move { get_transactions_for_user_server(name_clone.to_string()).await }
+    });
+
+    // Auto-refresh every 3 seconds
+    use_auto_refresh(3000, {
+        let refresh_trigger = refresh_trigger;
+        move || {
+            let refresh_trigger = refresh_trigger;
+            async move {
+                refresh_trigger.set(refresh_trigger.read() + 1);
+            }
+        }
     });
 
     rsx! {

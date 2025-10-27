@@ -4,6 +4,7 @@
 //! including listing existing users, adding new users, and deleting users.
 
 use crate::Route;
+use crate::hooks::use_auto_refresh;
 use dioxus::prelude::*;
 
 /// Home page component
@@ -12,14 +13,29 @@ use dioxus::prelude::*;
 /// - List of existing users with links to their transaction history
 /// - Form for adding new users
 /// - Delete buttons for removing users
+/// - Automatic refresh of user list every 2 seconds
 #[component]
 pub fn Home() -> Element {
     let mut user_input = use_signal(|| "".to_string());
     let mut users = use_signal(|| Vec::new());
 
+    // Initial load
     use_future(move || async move {
         if let Ok(data) = get_users().await {
             users.set(data);
+        }
+    });
+
+    // Auto-refresh every 2 seconds
+    use_auto_refresh(2000, {
+        let users = users;
+        move || {
+            let users = users;
+            async move {
+                if let Ok(data) = get_users().await {
+                    users.set(data);
+                }
+            }
         }
     });
 

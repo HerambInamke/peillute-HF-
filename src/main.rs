@@ -237,6 +237,7 @@ fn main() {
 }
 
 mod views;
+mod hooks;
 use views::*;
 
 const FAVICON: Asset = asset!("/assets/icon.png");

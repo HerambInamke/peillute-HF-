@@ -5,6 +5,7 @@
 //! various transaction operations.
 
 use crate::Route;
+use crate::hooks::use_auto_refresh;
 use dioxus::prelude::*;
 
 /// User management component
@@ -17,6 +18,7 @@ use dioxus::prelude::*;
 /// - Processing refunds
 /// - Transferring money
 /// - Making deposits
+/// - Automatic balance refresh every 2 seconds
 #[component]
 pub fn User(name: String) -> Element {
     let mut solde = use_signal(|| 0f64);
@@ -24,12 +26,30 @@ pub fn User(name: String) -> Element {
     let name = std::rc::Rc::new(name);
     let name_for_future = name.clone();
 
+    // Initial load
     {
         use_future(move || {
             let name = name_for_future.clone();
             async move {
                 if let Ok(data) = get_solde(name.to_string()).await {
                     solde.set(data);
+                }
+            }
+        });
+    }
+
+    // Auto-refresh balance every 2 seconds
+    {
+        use_auto_refresh(2000, {
+            let solde = solde;
+            let name = name.clone();
+            move || {
+                let solde = solde;
+                let name = name.clone();
+                async move {
+                    if let Ok(data) = get_solde(name.to_string()).await {
+                        solde.set(data);
+                    }
                 }
             }
         });
