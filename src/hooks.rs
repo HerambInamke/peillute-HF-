@@ -4,6 +4,7 @@
 //! making the UI feel more dynamic and responsive without manual page refreshes.
 
 use dioxus::prelude::*;
+use std::future::Future;
 
 /// A custom hook that automatically refreshes data at specified intervals
 ///
@@ -26,26 +27,22 @@ use dioxus::prelude::*;
 ///     }
 /// });
 /// ```
-pub fn use_auto_refresh<F, Fut>(interval_ms: u64, mut fetcher: F)
+pub fn use_auto_refresh<F, Fut>(interval_ms: u64, fetcher: F)
 where
-    F: FnMut() -> Fut + 'static,
+    F: Fn() -> Fut + 'static,
     Fut: Future<Output = ()> + 'static,
 {
     use_effect(move || {
         let mut interval = tokio::time::interval(tokio::time::Duration::from_millis(interval_ms));
-        let mut fetcher = fetcher;
-        
+
         let task = spawn(async move {
             loop {
                 interval.tick().await;
                 fetcher().await;
             }
         });
-        
-        // Cleanup: abort the task when the effect is cleaned up
-        on_cleanup(move || {
-            task.abort();
-        });
+
+        move || drop(task)
     });
 }
 

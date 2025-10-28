@@ -122,7 +122,7 @@ pub fn User(name: String) -> Element {
 ```rust
 pub fn Info() -> Element {
     let mut local_addr = use_signal(|| "".to_string());
-    let mut site_id = use_signal八月|| "".to_string());
+    let mut site_id = use_signal(|| "".to_string());
     // ... other signals
     
     // Initial load

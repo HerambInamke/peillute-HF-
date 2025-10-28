@@ -212,25 +212,25 @@ pub fn Info() -> Element {
 
     // Auto-refresh every 3 seconds
     use_auto_refresh(3000, {
-        let mut local_addr = local_addr;
-        let mut site_id = site_id;
-        let mut peers_addr = peers_addr;
-        let mut connected_neighbours = connected_neighbours;
-        let mut lamport = lamport;
-        let mut vector_clock = vector_clock;
-        let mut nb_neighbours = nb_neighbours;
-        let mut nb_peers = nb_peers;
-        let mut db_path = db_path;
+        let local_addr = local_addr;
+        let site_id = site_id;
+        let peers_addr = peers_addr;
+        let connected_neighbours = connected_neighbours;
+        let lamport = lamport;
+        let vector_clock = vector_clock;
+        let nb_neighbours = nb_neighbours;
+        let nb_peers = nb_peers;
+        let db_path = db_path;
         move || {
-            let mut local_addr = local_addr;
-            let mut site_id = site_id;
-            let mut peers_addr = peers_addr;
-            let mut connected_neighbours = connected_neighbours;
-            let mut lamport = lamport;
-            let mut vector_clock = vector_clock;
-            let mut nb_neighbours = nb_neighbours;
-            let mut nb_peers = nb_peers;
-            let mut db_path = db_path;
+            let local_addr = local_addr;
+            let site_id = site_id;
+            let peers_addr = peers_addr;
+            let connected_neighbours = connected_neighbours;
+            let lamport = lamport;
+            let vector_clock = vector_clock;
+            let nb_neighbours = nb_neighbours;
+            let nb_peers = nb_peers;
+            let db_path = db_path;
             async move {
                 if let Ok(data) = get_local_addr().await {
                     local_addr.set(data);
