@@ -26,7 +26,7 @@ use dioxus::prelude::*;
 ///     }
 /// });
 /// ```
-pub fn use_auto_refresh<F, Fut>(interval_ms: u64, fetcher: F)
+pub fn use_auto_refresh<F, Fut>(interval_ms: u64, mut fetcher: F)
 where
     F: FnMut() -> Fut + 'static,
     Fut: Future<Output = ()> + 'static,
@@ -35,11 +35,16 @@ where
         let mut interval = tokio::time::interval(tokio::time::Duration::from_millis(interval_ms));
         let mut fetcher = fetcher;
         
-        spawn(async move {
+        let task = spawn(async move {
             loop {
                 interval.tick().await;
                 fetcher().await;
             }
+        });
+        
+        // Cleanup: abort the task when the effect is cleaned up
+        on_cleanup(move || {
+            task.abort();
         });
     });
 }
@@ -71,12 +76,8 @@ where
             let refresh_counter = refresh_counter;
             let key = key.clone();
             async move {
-                if refresh_counter.read() % 10 == 0 {
-                    // Periodic forced refresh
-                    refresh_counter.set(refresh_counter.read() + 1);
-                } else {
-                    refresh_counter.set(refresh_counter.read() + 1);
-                }
+                // Trigger refresh by incrementing counter
+                refresh_counter.set(refresh_counter.read() + 1);
             }
         }
     });

@@ -28,9 +28,9 @@ pub fn Home() -> Element {
 
     // Auto-refresh every 2 seconds
     use_auto_refresh(2000, {
-        let users = users;
+        let mut users = users;
         move || {
-            let users = users;
+            let mut users = users;
             async move {
                 if let Ok(data) = get_users().await {
                     users.set(data);

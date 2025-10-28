@@ -41,10 +41,10 @@ pub fn User(name: String) -> Element {
     // Auto-refresh balance every 2 seconds
     {
         use_auto_refresh(2000, {
-            let solde = solde;
+            let mut solde = solde;
             let name = name.clone();
             move || {
-                let solde = solde;
+                let mut solde = solde;
                 let name = name.clone();
                 async move {
                     if let Ok(data) = get_solde(name.to_string()).await {
